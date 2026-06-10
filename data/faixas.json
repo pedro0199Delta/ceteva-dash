@@ -1,0 +1,14 @@
+{
+  "faixas": [
+    { "id": "ligar", "min": 1, "max": 1 },
+    { "id": "corrente", "min": 1, "max": 2 },
+    { "id": "potencia", "min": 18, "max": 25 },
+    { "id": "display", "min": 1, "max": 1 },
+    { "id": "aleta", "min": 1, "max": 1 },
+    { "id": "ruido", "min": 1, "max": 1 },
+    { "id": "fluxo", "min": 2, "max": 10 },
+    { "id": "odu", "min": 1, "max": 1 },
+    { "id": "onoff", "min": 1, "max": 1 }
+  ],
+  "atualizadoEm": "2026-06-10T00:00:00.000Z"
+}

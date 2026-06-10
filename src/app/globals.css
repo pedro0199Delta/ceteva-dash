@@ -1,26 +1,120 @@
 @import "tailwindcss";
 
+/* Tema baseado em classe: .dark ativa o modo escuro (padrão do console) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ----------------------------------------------------------------------
+   Design system DashDelta / CETEVA — identidade "Elgin"
+   Azul dominante, verde/amarelo/vermelho para estados, leitura industrial.
+---------------------------------------------------------------------- */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Tema CLARO */
+  --bg: #eef2f9;
+  --panel: #ffffff;
+  --panel-2: #f3f6fc;
+  --line: rgba(15, 23, 42, 0.12);
+  --fg: #0b1220;
+  --muted: #56627d;
+
+  --ok: #16a34a;
+  --ok-soft: rgba(22, 163, 74, 0.12);
+  --atencao: #d97706;
+  --atencao-soft: rgba(217, 119, 6, 0.14);
+  --falha: #dc2626;
+  --falha-soft: rgba(220, 38, 38, 0.12);
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.12);
+}
+
+.dark {
+  /* Tema ESCURO (padrão) */
+  --bg: #060c1d;
+  --panel: #0c1733;
+  --panel-2: #0f1f44;
+  --line: rgba(70, 116, 220, 0.22);
+  --fg: #e7eefb;
+  --muted: #8ea3cb;
+
+  --ok: #22c55e;
+  --ok-soft: rgba(34, 197, 94, 0.14);
+  --atencao: #f59e0b;
+  --atencao-soft: rgba(245, 158, 11, 0.16);
+  --falha: #ef4444;
+  --falha-soft: rgba(239, 68, 68, 0.16);
+  --accent: #3b82f6;
+  --accent-soft: rgba(59, 130, 246, 0.16);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-atencao: var(--atencao);
+  --color-atencao-soft: var(--atencao-soft);
+  --color-falha: var(--falha);
+  --color-falha-soft: var(--falha-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Faixa lateral colorida de card (borda esquerda de status) */
+.edge-ok {
+  box-shadow: inset 4px 0 0 0 var(--ok);
+}
+.edge-atencao {
+  box-shadow: inset 4px 0 0 0 var(--atencao);
+}
+.edge-falha {
+  box-shadow: inset 4px 0 0 0 var(--falha);
+}
+.edge-accent {
+  box-shadow: inset 4px 0 0 0 var(--accent);
+}
+
+/* Borda superior colorida (usada na visão do operador) */
+.top-ok {
+  box-shadow: inset 0 4px 0 0 var(--ok);
+}
+.top-atencao {
+  box-shadow: inset 0 4px 0 0 var(--atencao);
+}
+.top-falha {
+  box-shadow: inset 0 4px 0 0 var(--falha);
+}
+.top-accent {
+  box-shadow: inset 0 4px 0 0 var(--accent);
+}
+
+@keyframes pulse-falha {
+  0%,
+  100% {
+    box-shadow: inset 4px 0 0 0 var(--falha), 0 0 0 0 var(--falha-soft);
+  }
+  50% {
+    box-shadow: inset 4px 0 0 0 var(--falha), 0 0 22px 0 var(--falha-soft);
+  }
+}
+.alerta-falha {
+  animation: pulse-falha 1.8s ease-in-out infinite;
 }
