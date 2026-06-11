@@ -130,7 +130,7 @@ export function OperadorView({ snapshot }: { snapshot: Snapshot }) {
         >
           {msg.titulo}
         </h2>
-        {msg.detalhe && (
+        {"detalhe" in msg && msg.detalhe && (
           <p className="mt-3 text-sm text-muted">{msg.detalhe}</p>
         )}
         {teste && msg.token !== "accent" && (
