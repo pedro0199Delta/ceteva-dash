@@ -66,8 +66,17 @@ export const PARAMETROS: ParametroDef[] = [
   },
 ];
 
-/** Parâmetros exibidos na faixa de semáforo do operador. */
-export const SEMAFORO_OPERADOR = ["display", "aleta", "ruido", "fluxo", "odu", "onoff"];
+/** Parâmetros exibidos na faixa de semáforo do operador (inclui corrente e potência). */
+export const SEMAFORO_OPERADOR = [
+  "corrente",
+  "potencia",
+  "display",
+  "aleta",
+  "ruido",
+  "fluxo",
+  "odu",
+  "onoff",
+];
 
 export function getParametro(id: string): ParametroDef | undefined {
   return PARAMETROS.find((p) => p.id === id);

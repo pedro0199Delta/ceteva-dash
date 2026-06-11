@@ -19,6 +19,7 @@ export function MetricCard({
   borda = "left",
   pulse = false,
   compact = false,
+  valorAdaptavel = false,
 }: {
   titulo: string;
   badge?: string;
@@ -28,13 +29,15 @@ export function MetricCard({
   borda?: "left" | "top";
   pulse?: boolean;
   compact?: boolean;
+  /** Reduz o valor automaticamente para caber no card (ex.: número de série longo). */
+  valorAdaptavel?: boolean;
 }) {
   return (
     <Card
       edge={borda === "left" ? token : "none"}
       top={borda === "top" ? token : "none"}
       pulse={pulse}
-      className={compact ? "p-3" : "p-4"}
+      className={`min-w-0 overflow-hidden ${compact ? "p-3" : "p-4"}`}
     >
       <div className="flex items-start justify-between gap-2">
         <span className="text-xs font-medium uppercase tracking-wide text-muted">{titulo}</span>
@@ -45,13 +48,17 @@ export function MetricCard({
         )}
       </div>
       <div
-        className={`mt-2 font-bold leading-tight ${valorCor[token]} ${
-          compact ? "text-2xl" : "text-3xl"
+        className={`mt-2 min-w-0 font-bold leading-tight ${valorCor[token]} ${
+          valorAdaptavel
+            ? "text-[clamp(0.75rem,2.2vw,1.875rem)] break-all"
+            : compact
+              ? "text-2xl"
+              : "text-3xl"
         }`}
       >
         {valor}
       </div>
-      {sub && <div className="mt-1 text-xs text-muted">{sub}</div>}
+      {sub && <div className="mt-1 truncate text-xs text-muted">{sub}</div>}
     </Card>
   );
 }

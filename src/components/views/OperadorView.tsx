@@ -9,7 +9,7 @@ import { SemaforoItem } from "@/components/ui/SemaforoItem";
 function mensagemOperacional(teste: Teste): {
   token: "ok" | "atencao" | "falha";
   titulo: string;
-  detalhe: string;
+  detalhe?: string;
 } {
   const falha = teste.parametros.find((p) => p.status === "falha");
   const atencao = teste.parametros.find((p) => p.status === "atencao");
@@ -17,20 +17,19 @@ function mensagemOperacional(teste: Teste): {
     return {
       token: "falha",
       titulo: falha ? `Falha crítica: ${falha.label}` : "Teste reprovado",
-      detalhe: "Ação imediata requerida. Destaque no cartão afetado.",
+      detalhe: "Ação imediata requerida.",
     };
   }
   if (atencao) {
     return {
       token: "atencao",
       titulo: `Atenção: ${atencao.label} próximo do limite`,
-      detalhe: "Acompanhar parâmetro. Demais testes em conformidade.",
+      detalhe: "Acompanhar parâmetro.",
     };
   }
   return {
     token: "ok",
     titulo: "Todos os testes críticos em conformidade",
-    detalhe: "Leitura rápida para console dedicado. Sem exceções no ciclo atual.",
   };
 }
 
@@ -44,17 +43,16 @@ export function OperadorView({ snapshot }: { snapshot: Snapshot }) {
   const teste = snapshot.atual;
   const params = teste?.parametros ?? parametrosVazios();
   const param = (id: string) => params.find((p) => p.id === id)!;
-  const corrente = param("corrente");
-  const potencia = param("potencia");
   const critico = teste ? indicadorCritico(teste) : null;
   const semaforo = SEMAFORO_OPERADOR.map((id) => param(id));
   const msg = teste
     ? mensagemOperacional(teste)
-    : { token: "accent" as const, titulo: "—", detalhe: "" };
+    : { token: "accent" as const, titulo: "—" };
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
+      {/* Linha superior: cards essenciais */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <MetricCard
           titulo="Teste atual"
           badge="Nº Série"
@@ -62,6 +60,7 @@ export function OperadorView({ snapshot }: { snapshot: Snapshot }) {
           sub={teste?.modelo || "—"}
           token="accent"
           borda="top"
+          valorAdaptavel
         />
         <MetricCard
           titulo="Linha"
@@ -70,62 +69,41 @@ export function OperadorView({ snapshot }: { snapshot: Snapshot }) {
           sub={teste?.ipCeteva ? `CETEVA ${teste.ipCeteva}` : "—"}
           token="accent"
           borda="top"
+          valorAdaptavel
         />
         <MetricCard
           titulo="Resultado"
           badge="Status"
           valor={teste ? resultadoLabel[teste.resultado] : "—"}
-          sub={teste ? `Código ${teste.resultado === "aprovado" ? "0" : teste.resultado === "reprovado" ? "1" : "—"}` : "—"}
+          sub={
+            teste
+              ? `Código ${teste.resultado === "aprovado" ? "0" : teste.resultado === "reprovado" ? "1" : "—"}`
+              : "—"
+          }
           token={teste ? resultadoToken(teste.resultado) : "none"}
           borda="top"
           pulse={teste?.resultado === "reprovado"}
         />
         <MetricCard
-          titulo="Corrente"
-          badge="Corrente"
-          valor={corrente.texto}
-          sub={
-            teste
-              ? corrente.faixaLabel
-                ? `Ref. ${corrente.faixaLabel}${corrente.status === "falha" ? " · FORA" : corrente.status === "ok" ? " · OK" : ""}`
-                : corrente.status === "ok"
-                  ? "Faixa normal"
-                  : statusLabel[corrente.status]
-              : "—"
-          }
-          token={teste ? statusToken(corrente.status) : "none"}
-          borda="top"
-          pulse={corrente.status === "falha"}
-        />
-        <MetricCard
-          titulo="Potência"
-          badge="Potência"
-          valor={potencia.texto}
-          sub={
-            teste
-              ? potencia.faixaLabel
-                ? `Ref. ${potencia.faixaLabel}${potencia.status === "falha" ? " · FORA" : potencia.status === "ok" ? " · OK" : ""}`
-                : potencia.status === "ok"
-                  ? "Faixa normal"
-                  : statusLabel[potencia.status]
-              : "—"
-          }
-          token={teste ? statusToken(potencia.status) : "none"}
-          borda="top"
-          pulse={potencia.status === "falha"}
-        />
-        <MetricCard
           titulo="Atenção prioritária"
           badge={critico ? critico.label : "—"}
-          valor={critico ? (critico.status === "falha" ? `${critico.label} em falha` : critico.label) : "—"}
+          valor={
+            critico
+              ? critico.status === "falha"
+                ? `${critico.label} em falha`
+                : critico.label
+              : "—"
+          }
           sub={critico ? statusLabel[critico.status] : "—"}
           token={critico ? statusToken(critico.status) : "none"}
           borda="top"
           pulse={critico?.status === "falha"}
+          valorAdaptavel
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+      {/* Faixa de parâmetros (steps) */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8">
         {semaforo.map((p) => (
           <SemaforoItem key={p.id} p={p} />
         ))}
@@ -152,12 +130,16 @@ export function OperadorView({ snapshot }: { snapshot: Snapshot }) {
         >
           {msg.titulo}
         </h2>
-        {msg.detalhe && <p className="mt-3 text-sm text-muted">{msg.detalhe}</p>}
+        {msg.detalhe && (
+          <p className="mt-3 text-sm text-muted">{msg.detalhe}</p>
+        )}
         {teste && msg.token !== "accent" && (
           <div className="mt-5 h-2.5 w-full overflow-hidden rounded-full bg-panel-2">
             <div
               className={`h-full rounded-full ${barra[msg.token]}`}
-              style={{ width: msg.token === "ok" ? "100%" : msg.token === "atencao" ? "60%" : "30%" }}
+              style={{
+                width: msg.token === "ok" ? "100%" : msg.token === "atencao" ? "60%" : "30%",
+              }}
             />
           </div>
         )}
