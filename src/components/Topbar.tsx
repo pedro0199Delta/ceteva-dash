@@ -18,10 +18,7 @@ export function Topbar({
     <header className="flex items-center justify-between gap-4 border-b border-line px-5 py-3">
       <div className="flex items-baseline gap-3">
         <span className="text-lg font-extrabold tracking-tight text-fg">
-          CETEVA <span className="text-accent">| DashDelta</span>
-        </span>
-        <span className="hidden text-xs text-muted sm:inline">
-          Interface operacional de fábrica
+          CETEVA <span className="text-accent">| Elgin</span>
         </span>
       </div>
 

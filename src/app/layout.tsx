@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DashDelta · CETEVA",
+  title: "Elgin · CETEVA",
   description: "Interface operacional de fábrica — leitura rápida, falhas e rastreabilidade.",
 };
 
