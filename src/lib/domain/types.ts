@@ -52,10 +52,30 @@ export interface FaixasConfig {
 /** Payload bruto recebido do app externo (chaves livres). */
 export type TesteBruto = Record<string, unknown>;
 
+/** Um segmento do código serialModelo (12 caracteres). */
+export interface SegmentoModelo {
+  grupo: string;
+  posicao: string;
+  codigo: string;
+  descricao: string;
+  conhecido: boolean;
+}
+
+/** Decodificação do código de modelo CETEVA. */
+export interface ModeloDecodificado {
+  codigo: string;
+  comprimentoValido: boolean;
+  segmentos: SegmentoModelo[];
+  resumo: string;
+}
+
 /** Teste normalizado, pronto para a UI. */
 export interface Teste {
   id: string;
   serial: string;
+  /** Código de 12 caracteres (ex.: 45HJFI12C2WG). */
+  serialModelo: string;
+  modeloDecodificado: ModeloDecodificado | null;
   modelo: string;
   linha: string;
   ipCeteva: string;

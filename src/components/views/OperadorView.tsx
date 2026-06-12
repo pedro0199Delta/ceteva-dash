@@ -4,6 +4,7 @@ import { parametrosVazios, SEMAFORO_OPERADOR } from "@/lib/domain/parametros";
 import { resultadoLabel, resultadoToken, statusLabel, statusToken } from "@/lib/format";
 import { Card } from "@/components/ui/Card";
 import { MetricCard } from "@/components/ui/MetricCard";
+import { ModeloRodape } from "@/components/ui/ModeloRodape";
 import { SemaforoItem } from "@/components/ui/SemaforoItem";
 
 function mensagemOperacional(teste: Teste): {
@@ -57,7 +58,7 @@ export function OperadorView({ snapshot }: { snapshot: Snapshot }) {
           titulo="Teste atual"
           badge="Nº Série"
           valor={teste?.serial || "—"}
-          sub={teste?.modelo || "—"}
+          sub={teste?.serialModelo || teste?.modelo || "—"}
           token="accent"
           borda="top"
           valorAdaptavel
@@ -144,6 +145,11 @@ export function OperadorView({ snapshot }: { snapshot: Snapshot }) {
           </div>
         )}
       </Card>
+
+      <ModeloRodape
+        serialModelo={teste?.serialModelo}
+        decodificado={teste?.modeloDecodificado}
+      />
     </div>
   );
 }

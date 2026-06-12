@@ -1,4 +1,5 @@
 import { PARAMETROS } from "./parametros";
+import { decodificarSerialModelo } from "./serialModelo";
 import type {
   Excecao,
   FaixaParametro,
@@ -207,7 +208,12 @@ let contador = 0;
 export function normalizarTeste(bruto: TesteBruto, faixas: FaixaParametro[] = []): Teste {
   const mapaFaixas = new Map(faixas.map((f) => [f.id, f]));
   const serial = String(lerCampo(bruto, ["serial", "Serial", "NroSerie", "numeroSerie"]) ?? "").trim();
-  const modelo = String(lerCampo(bruto, ["modelo", "Modelo", "model"]) ?? "").trim();
+  const serialModelo = String(
+    lerCampo(bruto, ["serialModelo", "SerialModelo", "serial_modelo", "inicioSerialModel"]) ?? "",
+  ).trim();
+  const modeloLegado = String(lerCampo(bruto, ["modelo", "Modelo", "model"]) ?? "").trim();
+  const modeloDecodificado = serialModelo ? decodificarSerialModelo(serialModelo) : null;
+  const modelo = modeloLegado || modeloDecodificado?.resumo || serialModelo;
   const linha = String(lerCampo(bruto, ["linha", "Linha", "linhaProducao"]) ?? "").trim();
   const ipCeteva = String(lerCampo(bruto, ["ipCeteva", "IP", "ip", "ceteva", "IP CETEVA"]) ?? "").trim();
   const operador = String(lerCampo(bruto, ["operador", "Operador", "operator"]) ?? "").trim();
@@ -245,6 +251,8 @@ export function normalizarTeste(bruto: TesteBruto, faixas: FaixaParametro[] = []
   return {
     id,
     serial,
+    serialModelo,
+    modeloDecodificado,
     modelo,
     linha,
     ipCeteva,

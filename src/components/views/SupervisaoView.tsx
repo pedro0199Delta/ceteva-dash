@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { ParametroRow } from "@/components/ui/ParametroRow";
+import { ModeloRodape } from "@/components/ui/ModeloRodape";
 import { TendenciaChart } from "@/components/charts/TendenciaChart";
 import { TaxaParametroChart } from "@/components/charts/TaxaParametroChart";
 
@@ -53,7 +54,7 @@ export function SupervisaoView({ snapshot }: { snapshot: Snapshot }) {
             titulo="Equipamento em teste"
             badge="Nº Série"
             valor={teste?.serial || "—"}
-            sub={teste?.modelo ? `Modelo ${teste.modelo}` : "—"}
+            sub={teste?.serialModelo || teste?.modelo ? `Modelo ${teste.serialModelo || teste.modelo}` : "—"}
             token="none"
           />
           <MetricCard
@@ -123,7 +124,7 @@ export function SupervisaoView({ snapshot }: { snapshot: Snapshot }) {
         <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs text-muted">
           <span>Série {teste?.serial || "—"}</span>
           <span>·</span>
-          <span>Modelo {teste?.modelo || "—"}</span>
+          <span>Código modelo {teste?.serialModelo || "—"}</span>
           <span>·</span>
           <span>Linha {teste?.linha || "—"}</span>
           <span>·</span>
@@ -134,6 +135,11 @@ export function SupervisaoView({ snapshot }: { snapshot: Snapshot }) {
           <span>Operador {teste?.operador || "—"}</span>
         </div>
       </Card>
+
+      <ModeloRodape
+        serialModelo={teste?.serialModelo}
+        decodificado={teste?.modeloDecodificado}
+      />
     </div>
   );
 }

@@ -104,6 +104,7 @@ Content-Type: application/json
 
 {
   "serial": "",
+  "serialModelo": "45HJFI12C2WG",
   "dthInicio": "20/05/2026 15:41:15",
   "dthGeraLog": "2026-05-20 15:41:15",
   "tempo_teste": "00:00:31",
