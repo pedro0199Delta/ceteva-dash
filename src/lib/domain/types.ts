@@ -49,6 +49,36 @@ export interface FaixasConfig {
   atualizadoEm: string;
 }
 
+export interface TurnoDef {
+  id: 1 | 2 | 3;
+  label: string;
+  /** Horário de início (HH:mm). */
+  inicio: string;
+}
+
+export interface TurnosConfig {
+  turnos: TurnoDef[];
+  atualizadoEm: string;
+}
+
+export interface LinhasConfig {
+  linhas: string[];
+  atualizadoEm: string;
+}
+
+export interface TurnoAtualInfo {
+  id: 1 | 2 | 3;
+  label: string;
+  inicio: string;
+  fim: string;
+}
+
+export interface YieldResumo {
+  aprovados: number;
+  reprovados: number;
+  taxa: number;
+}
+
 /** Payload bruto recebido do app externo (chaves livres). */
 export type TesteBruto = Record<string, unknown>;
 
@@ -78,6 +108,8 @@ export interface Teste {
   modeloDecodificado: ModeloDecodificado | null;
   modelo: string;
   linha: string;
+  turno: 1 | 2 | 3 | null;
+  turnoLabel: string;
   ipCeteva: string;
   operador: string;
   dthInicio: string;
@@ -110,10 +142,15 @@ export interface TaxaParametro {
 export interface Snapshot {
   atual: Teste | null;
   totalTestes: number;
-  yield24h: { aprovados: number; reprovados: number; taxa: number };
+  /** Métricas do turno vigente (zeram ao mudar o turno). */
+  yieldTurno: YieldResumo;
+  turnoAtual: TurnoAtualInfo | null;
+  linhaFiltro: string;
   tempoMedioSeg: number | null;
   tendencia: PontoTendencia[];
   taxaPorParametro: TaxaParametro[];
   excecoes: Excecao[];
   ultimaAtualizacao: string;
+  /** @deprecated Use yieldTurno — mantido por compatibilidade. */
+  yield24h: YieldResumo;
 }

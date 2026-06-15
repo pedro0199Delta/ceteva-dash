@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { useConfig, type Modo, type Tema } from "@/context/ConfigContext";
 import { Card } from "@/components/ui/Card";
 import { FaixasEditor } from "@/components/config/FaixasEditor";
+import { TurnosEditor } from "@/components/config/TurnosEditor";
+import { LinhasEditor } from "@/components/config/LinhasEditor";
 
 function Segmented<T extends string>({
   valor,
@@ -66,7 +68,7 @@ export default function ConfigPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-extrabold text-fg">Configuração</h1>
-          <p className="text-sm text-muted">Ajustes do console DashDelta · CETEVA</p>
+          <p className="text-sm text-muted">Ajustes do console Elgin · CETEVA</p>
         </div>
         <Link
           href="/"
@@ -75,6 +77,27 @@ export default function ConfigPage() {
           ← Voltar ao painel
         </Link>
       </div>
+
+      <Card className="p-5">
+        <h3 className="font-semibold text-fg">Turnos de produção</h3>
+        <p className="mt-0.5 text-sm text-muted">
+          Horários do 1º, 2º e 3º turno. Estatísticas zeram ao mudar o turno (base: dthGeraLog).
+        </p>
+        <div className="mt-4">
+          <TurnosEditor />
+        </div>
+      </Card>
+
+      <Card className="p-5">
+        <h3 className="font-semibold text-fg">Linhas de produção</h3>
+        <p className="mt-0.5 text-sm text-muted">
+          Cadastre os nomes das linhas para filtrar o painel. Devem coincidir com{" "}
+          <code className="text-fg">linha_producao</code> enviado pelo CETEVA.
+        </p>
+        <div className="mt-4">
+          <LinhasEditor />
+        </div>
+      </Card>
 
       <Card className="p-5">
         <h3 className="font-semibold text-fg">Faixas de aprovação</h3>
@@ -105,6 +128,7 @@ Content-Type: application/json
 {
   "serial": "",
   "serialModelo": "45HJFI12C2WG",
+  "linha_producao": "Linha 01",
   "dthInicio": "20/05/2026 15:41:15",
   "dthGeraLog": "2026-05-20 15:41:15",
   "tempo_teste": "00:00:31",

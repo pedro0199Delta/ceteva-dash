@@ -15,9 +15,10 @@ export function SupervisaoView({ snapshot }: { snapshot: Snapshot }) {
   const critico = teste ? indicadorCritico(teste) : null;
   const parametros = teste?.parametros ?? parametrosVazios();
   const yieldTxt =
-    snapshot.yield24h.taxa > 0
-      ? `${snapshot.yield24h.taxa.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}%`
+    snapshot.yieldTurno.taxa > 0
+      ? `${snapshot.yieldTurno.taxa.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}%`
       : "—";
+  const turnoBadge = snapshot.turnoAtual?.label ?? "Turno";
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">
@@ -33,13 +34,15 @@ export function SupervisaoView({ snapshot }: { snapshot: Snapshot }) {
             pulse={teste?.resultado === "reprovado"}
           />
           <MetricCard
-            titulo="Resultado 24h"
-            badge="Yield"
+            titulo="Resultado do turno"
+            badge={turnoBadge}
             valor={yieldTxt}
             sub={
-              snapshot.yield24h.aprovados + snapshot.yield24h.reprovados > 0
-                ? `${snapshot.yield24h.aprovados} aprov. · ${snapshot.yield24h.reprovados} reprov.`
-                : "—"
+              snapshot.yieldTurno.aprovados + snapshot.yieldTurno.reprovados > 0
+                ? `${snapshot.yieldTurno.aprovados} aprov. · ${snapshot.yieldTurno.reprovados} reprov.`
+                : snapshot.turnoAtual
+                  ? `${snapshot.turnoAtual.inicio}–${snapshot.turnoAtual.fim}`
+                  : "—"
             }
             token="none"
           />
@@ -79,7 +82,7 @@ export function SupervisaoView({ snapshot }: { snapshot: Snapshot }) {
 
           <div className="mt-1 grid gap-3 md:grid-cols-2">
             <Card className="p-4">
-              <h3 className="mb-3 text-sm font-bold text-fg">Tendência de desvio por hora</h3>
+              <h3 className="mb-3 text-sm font-bold text-fg">Tendência do turno (por hora)</h3>
               <TendenciaChart dados={snapshot.tendencia} />
             </Card>
             <Card className="p-4">

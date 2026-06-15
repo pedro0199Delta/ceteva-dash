@@ -1,5 +1,7 @@
 import { PARAMETROS } from "./parametros";
 import { decodificarSerialModelo } from "./serialModelo";
+import { classificarTurno } from "./turnos";
+import { parseData, parseTempoTeste } from "./datas";
 import type {
   Excecao,
   FaixaParametro,
@@ -12,7 +14,16 @@ import type {
   TaxaParametro,
   Teste,
   TesteBruto,
+  TurnosConfig,
+  YieldResumo,
 } from "./types";
+import {
+  dataReferenciaTeste,
+  formatarHoraCurta,
+  janelaTurnoAtual,
+  testeNaJanela,
+} from "./turnos";
+import { TURNOS_PADRAO } from "./turnosPadrao";
 
 /* ----------------------------- utilidades ----------------------------- */
 
@@ -162,50 +173,15 @@ export function classificarResultado(raw: unknown): Resultado {
   return "indefinido";
 }
 
-/* ------------------------------ parse de datas ----------------------------- */
-
-/** Aceita "dd/MM/yyyy HH:mm:ss" e "yyyy-MM-dd HH:mm:ss". */
-export function parseData(texto: string | undefined): Date | null {
-  if (!texto) return null;
-  const t = texto.trim();
-  let m = t.match(/^(\d{2})\/(\d{2})\/(\d{4})[ T](\d{2}):(\d{2}):(\d{2})/);
-  if (m) {
-    const [, dd, MM, yyyy, hh, mi, ss] = m;
-    return new Date(+yyyy, +MM - 1, +dd, +hh, +mi, +ss);
-  }
-  m = t.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
-  if (m) {
-    const [, yyyy, MM, dd, hh, mi, ss] = m;
-    return new Date(+yyyy, +MM - 1, +dd, +hh, +mi, +ss);
-  }
-  const d = new Date(t);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
-
-/** Aceita "HH:mm:ss" ou "mm:ss" (campo tempo_teste enviado pelo CETEVA). */
-export function parseTempoTeste(texto: unknown): number | null {
-  if (texto === undefined || texto === null) return null;
-  const t = String(texto).trim();
-  if (!t) return null;
-
-  let m = t.match(/^(\d{1,2}):(\d{2}):(\d{2})$/);
-  if (m) {
-    const [, hh, mi, ss] = m;
-    return +hh * 3600 + +mi * 60 + +ss;
-  }
-  m = t.match(/^(\d{1,2}):(\d{2})$/);
-  if (m) {
-    const [, mi, ss] = m;
-    return +mi * 60 + +ss;
-  }
-  return null;
-}
-
-/* --------------------------- normalização principal ------------------------ */
+export { parseData, parseTempoTeste } from "./datas";
 
 let contador = 0;
 
-export function normalizarTeste(bruto: TesteBruto, faixas: FaixaParametro[] = []): Teste {
+export function normalizarTeste(
+  bruto: TesteBruto,
+  faixas: FaixaParametro[] = [],
+  turnos: TurnosConfig = TURNOS_PADRAO,
+): Teste {
   const mapaFaixas = new Map(faixas.map((f) => [f.id, f]));
   const serial = String(lerCampo(bruto, ["serial", "Serial", "NroSerie", "numeroSerie"]) ?? "").trim();
   const serialModelo = String(
@@ -214,7 +190,9 @@ export function normalizarTeste(bruto: TesteBruto, faixas: FaixaParametro[] = []
   const modeloLegado = String(lerCampo(bruto, ["modelo", "Modelo", "model"]) ?? "").trim();
   const modeloDecodificado = serialModelo ? decodificarSerialModelo(serialModelo) : null;
   const modelo = modeloLegado || modeloDecodificado?.resumo || serialModelo;
-  const linha = String(lerCampo(bruto, ["linha", "Linha", "linhaProducao"]) ?? "").trim();
+  const linha = String(
+    lerCampo(bruto, ["linha", "Linha", "linhaProducao", "linha_producao"]) ?? "",
+  ).trim();
   const ipCeteva = String(lerCampo(bruto, ["ipCeteva", "IP", "ip", "ceteva", "IP CETEVA"]) ?? "").trim();
   const operador = String(lerCampo(bruto, ["operador", "Operador", "operator"]) ?? "").trim();
   const dthInicio = String(lerCampo(bruto, ["dthInicio", "dataInicio", "inicio"]) ?? "").trim();
@@ -245,6 +223,9 @@ export function normalizarTeste(bruto: TesteBruto, faixas: FaixaParametro[] = []
     inicio && fim ? Math.max(0, Math.round((fim.getTime() - inicio.getTime()) / 1000)) : null;
   const duracaoSeg = tempoTesteSeg ?? duracaoPorDatas;
 
+  const refLog = parseData(dthGeraLog);
+  const turnoInfo = refLog ? classificarTurno(refLog, turnos) : null;
+
   contador += 1;
   const id = `${Date.now().toString(36)}-${contador.toString(36)}`;
 
@@ -255,6 +236,8 @@ export function normalizarTeste(bruto: TesteBruto, faixas: FaixaParametro[] = []
     modeloDecodificado,
     modelo,
     linha,
+    turno: turnoInfo?.id ?? null,
+    turnoLabel: turnoInfo?.label ?? "",
     ipCeteva,
     operador,
     dthInicio,
@@ -309,44 +292,70 @@ const TITULOS_ATENCAO: Record<string, string> = {
 
 /* ------------------------------ agregações --------------------------------- */
 
-export function montarSnapshot(testes: Teste[]): Snapshot {
-  const ordenados = [...testes].sort(
-    (a, b) => new Date(b.recebidoEm).getTime() - new Date(a.recebidoEm).getTime(),
-  );
-  const atual = ordenados[0] ?? null;
-  const agora = Date.now();
-  const dia = 24 * 60 * 60 * 1000;
-  const ultimas24h = ordenados.filter((t) => agora - new Date(t.recebidoEm).getTime() <= dia);
+export interface OpcoesSnapshot {
+  linhaFiltro?: string;
+  turnos?: TurnosConfig;
+}
 
-  const aprovados = ultimas24h.filter((t) => t.resultado === "aprovado").length;
-  const reprovados = ultimas24h.filter((t) => t.resultado === "reprovado").length;
+function filtrarPorLinha(testes: Teste[], linhaFiltro?: string): Teste[] {
+  const f = linhaFiltro?.trim();
+  if (!f) return testes;
+  return testes.filter((t) => t.linha === f);
+}
+
+function calcularYield(lista: Teste[]): YieldResumo {
+  const aprovados = lista.filter((t) => t.resultado === "aprovado").length;
+  const reprovados = lista.filter((t) => t.resultado === "reprovado").length;
   const totalResult = aprovados + reprovados;
   const taxa = totalResult > 0 ? (aprovados / totalResult) * 100 : 0;
+  return { aprovados, reprovados, taxa: Math.round(taxa * 10) / 10 };
+}
 
-  const duracoes = ultimas24h.map((t) => t.duracaoSeg).filter((d): d is number => d !== null && d > 0);
+function montarTendenciaTurno(ordenados: Teste[], inicio: Date, fim: Date): PontoTendencia[] {
+  const pontos: PontoTendencia[] = [];
+  let cursor = new Date(inicio);
+  while (cursor < fim) {
+    const slotFim = new Date(cursor);
+    slotFim.setHours(cursor.getHours() + 1, 0, 0, 0);
+    const fimSlot = slotFim < fim ? slotFim : fim;
+    const naFaixa = ordenados.filter((t) => {
+      const d = dataReferenciaTeste(t);
+      return d >= cursor && d < fimSlot;
+    });
+    pontos.push({
+      hora: `${String(cursor.getHours()).padStart(2, "0")}h`,
+      desvios: naFaixa.filter((t) => t.resultado === "reprovado").length,
+      total: naFaixa.length,
+    });
+    cursor = fimSlot;
+  }
+  return pontos.length ? pontos : [{ hora: "—", desvios: 0, total: 0 }];
+}
+
+export function montarSnapshot(testes: Teste[], opcoes: OpcoesSnapshot = {}): Snapshot {
+  const turnos = opcoes.turnos ?? TURNOS_PADRAO;
+  const linhaFiltro = opcoes.linhaFiltro?.trim() ?? "";
+  const agora = new Date();
+  const janela = janelaTurnoAtual(agora, turnos);
+
+  const porLinha = filtrarPorLinha(testes, linhaFiltro || undefined);
+  const ordenados = [...porLinha].sort(
+    (a, b) => new Date(b.recebidoEm).getTime() - new Date(a.recebidoEm).getTime(),
+  );
+  const noTurno = ordenados.filter((t) => testeNaJanela(t, janela.inicio, janela.fim));
+  const atual = ordenados[0] ?? null;
+
+  const yieldTurno = calcularYield(noTurno);
+
+  const duracoes = noTurno.map((t) => t.duracaoSeg).filter((d): d is number => d !== null && d > 0);
   const tempoMedioSeg = duracoes.length
     ? Math.round(duracoes.reduce((a, b) => a + b, 0) / duracoes.length)
     : null;
 
-  // Tendência de desvio por hora (últimas 12 horas)
-  const tendencia: PontoTendencia[] = [];
-  for (let i = 11; i >= 0; i--) {
-    const ref = new Date(agora - i * 60 * 60 * 1000);
-    const hora = ref.getHours();
-    const naFaixa = ordenados.filter((t) => {
-      const d = new Date(t.recebidoEm);
-      return d.getHours() === hora && agora - d.getTime() <= 12 * 60 * 60 * 1000;
-    });
-    tendencia.push({
-      hora: `${String(hora).padStart(2, "0")}h`,
-      desvios: naFaixa.filter((t) => t.resultado === "reprovado").length,
-      total: naFaixa.length,
-    });
-  }
+  const tendencia = montarTendenciaTurno(noTurno, janela.inicio, janela.fim);
 
-  // Taxa de aprovação por parâmetro
   const taxaPorParametro: TaxaParametro[] = PARAMETROS.map((def) => {
-    const leituras = ordenados
+    const leituras = noTurno
       .map((t) => t.parametros.find((p) => p.id === def.id))
       .filter((p): p is NonNullable<typeof p> => !!p && p.status !== "indefinido");
     const ok = leituras.filter((p) => p.status === "ok").length;
@@ -358,12 +367,20 @@ export function montarSnapshot(testes: Teste[]): Snapshot {
     };
   });
 
-  const excecoes = montarExcecoes(atual, ordenados);
+  const excecoes = montarExcecoes(atual, noTurno);
 
   return {
     atual,
-    totalTestes: testes.length,
-    yield24h: { aprovados, reprovados, taxa: Math.round(taxa * 10) / 10 },
+    totalTestes: noTurno.length,
+    yieldTurno,
+    yield24h: yieldTurno,
+    turnoAtual: {
+      id: janela.id,
+      label: janela.label,
+      inicio: formatarHoraCurta(janela.inicio),
+      fim: formatarHoraCurta(janela.fim),
+    },
+    linhaFiltro,
     tempoMedioSeg,
     tendencia,
     taxaPorParametro,

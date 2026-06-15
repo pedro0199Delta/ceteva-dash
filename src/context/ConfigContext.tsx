@@ -16,12 +16,15 @@ export interface Config {
   modo: Modo;
   tema: Tema;
   intervaloMs: number;
+  /** Nome da linha cadastrada — vazio = todas. */
+  linhaFiltro: string;
 }
 
 const PADRAO: Config = {
   modo: "operador",
   tema: "dark",
   intervaloMs: 2000,
+  linhaFiltro: "",
 };
 
 const CHAVE = "dashdelta:config";

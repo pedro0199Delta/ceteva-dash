@@ -1,4 +1,4 @@
-import type { FaixaParametro, FaixasConfig, Teste, TesteBruto } from "@/lib/domain/types";
+import type { FaixaParametro, FaixasConfig, LinhasConfig, Teste, TesteBruto, TurnosConfig } from "@/lib/domain/types";
 
 export interface StorageAdapter {
   adicionarTeste(bruto: TesteBruto): Promise<Teste>;
@@ -7,6 +7,11 @@ export interface StorageAdapter {
   lerFaixas(): Promise<FaixasConfig>;
   salvarFaixas(faixas: FaixaParametro[]): Promise<FaixasConfig>;
   resetarFaixas(): Promise<FaixasConfig>;
+  lerTurnos(): Promise<TurnosConfig>;
+  salvarTurnos(turnos: TurnosConfig["turnos"]): Promise<TurnosConfig>;
+  resetarTurnos(): Promise<TurnosConfig>;
+  lerLinhas(): Promise<LinhasConfig>;
+  salvarLinhas(linhas: string[]): Promise<LinhasConfig>;
 }
 
 export function usaKv(): boolean {

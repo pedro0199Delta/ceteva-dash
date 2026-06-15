@@ -9,7 +9,7 @@ interface Estado {
   erro: string | null;
 }
 
-export function useSnapshot(intervaloMs: number) {
+export function useSnapshot(intervaloMs: number, linhaFiltro = "") {
   const [estado, setEstado] = useState<Estado>({
     snapshot: null,
     carregando: true,
@@ -22,7 +22,8 @@ export function useSnapshot(intervaloMs: number) {
 
     async function buscar() {
       try {
-        const res = await fetch("/api/snapshot", { cache: "no-store" });
+        const qs = linhaFiltro ? `?linha=${encodeURIComponent(linhaFiltro)}` : "";
+        const res = await fetch(`/api/snapshot${qs}`, { cache: "no-store" });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = (await res.json()) as Snapshot;
         if (ativo.current) setEstado({ snapshot: data, carregando: false, erro: null });
@@ -42,7 +43,7 @@ export function useSnapshot(intervaloMs: number) {
       ativo.current = false;
       clearInterval(id);
     };
-  }, [intervaloMs]);
+  }, [intervaloMs, linhaFiltro]);
 
   return estado;
 }

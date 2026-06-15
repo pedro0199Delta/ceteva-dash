@@ -65,9 +65,9 @@ export function OperadorView({ snapshot }: { snapshot: Snapshot }) {
         />
         <MetricCard
           titulo="Linha"
-          badge="Linha"
-          valor={teste?.linha || "—"}
-          sub={teste?.ipCeteva ? `CETEVA ${teste.ipCeteva}` : "—"}
+          badge={teste?.turnoLabel || snapshot.turnoAtual?.label || "Turno"}
+          valor={teste?.linha || snapshot.linhaFiltro || "—"}
+          sub={teste?.ipCeteva ? `CETEVA ${teste.ipCeteva}` : snapshot.linhaFiltro ? `Filtro: ${snapshot.linhaFiltro}` : "—"}
           token="accent"
           borda="top"
           valorAdaptavel
