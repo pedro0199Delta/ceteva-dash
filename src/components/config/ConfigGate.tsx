@@ -1,28 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
 
+async function encerrarSessao() {
+  try {
+    await fetch("/api/config/auth", { method: "DELETE", credentials: "include", keepalive: true });
+  } catch {
+    /* ignore */
+  }
+}
+
 export function ConfigGate({ children }: { children: React.ReactNode }) {
-  const [estado, setEstado] = useState<"carregando" | "bloqueado" | "liberado">("carregando");
+  const [liberado, setLiberado] = useState(false);
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
-  const verificar = useCallback(async () => {
-    try {
-      const res = await fetch("/api/config/auth", { cache: "no-store", credentials: "include" });
-      const data = await res.json();
-      setEstado(data.autenticado ? "liberado" : "bloqueado");
-    } catch {
-      setEstado("bloqueado");
-    }
-  }, []);
-
   useEffect(() => {
-    verificar();
-  }, [verificar]);
+    encerrarSessao();
+    return () => {
+      encerrarSessao();
+    };
+  }, []);
 
   async function entrar(e: React.FormEvent) {
     e.preventDefault();
@@ -41,7 +42,7 @@ export function ConfigGate({ children }: { children: React.ReactNode }) {
         return;
       }
       setSenha("");
-      setEstado("liberado");
+      setLiberado(true);
     } catch {
       setErro("Não foi possível validar a senha.");
     } finally {
@@ -50,19 +51,11 @@ export function ConfigGate({ children }: { children: React.ReactNode }) {
   }
 
   async function sair() {
-    await fetch("/api/config/auth", { method: "DELETE", credentials: "include" });
-    setEstado("bloqueado");
+    await encerrarSessao();
+    setLiberado(false);
   }
 
-  if (estado === "carregando") {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-sm text-muted">
-        Verificando acesso…
-      </div>
-    );
-  }
-
-  if (estado === "bloqueado") {
+  if (!liberado) {
     return (
       <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-5 p-5">
         <div className="text-center">
@@ -99,6 +92,7 @@ export function ConfigGate({ children }: { children: React.ReactNode }) {
 
         <Link
           href="/"
+          onClick={() => encerrarSessao()}
           className="text-center text-sm font-semibold text-muted hover:text-accent"
         >
           ← Voltar ao painel
@@ -110,6 +104,13 @@ export function ConfigGate({ children }: { children: React.ReactNode }) {
   return (
     <>
       <div className="mx-auto flex max-w-3xl justify-end px-5 pt-5">
+        <Link
+          href="/"
+          onClick={() => encerrarSessao()}
+          className="mr-4 text-xs font-semibold text-muted hover:text-accent"
+        >
+          ← Voltar ao painel
+        </Link>
         <button
           type="button"
           onClick={sair}

@@ -17,7 +17,6 @@ export function Topbar({
 }) {
   const { config, setConfig } = useConfig();
   const linhas = useLinhasCadastro();
-  const modoLabel = config.modo === "operador" ? "Operador" : "Supervisão";
 
   return (
     <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-3">
@@ -60,9 +59,6 @@ export function Topbar({
         {ultimaAtualizacao && (
           <span className="hidden text-muted md:inline">· {formatHora(ultimaAtualizacao)}</span>
         )}
-        <span className="rounded-md border border-line px-2 py-1 font-semibold text-muted">
-          {modoLabel}
-        </span>
         <Link
           href="/config"
           className="rounded-md border border-line bg-panel px-3 py-1 font-semibold text-fg transition-colors hover:border-accent hover:text-accent"

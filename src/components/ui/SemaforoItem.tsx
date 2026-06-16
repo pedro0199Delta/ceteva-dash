@@ -10,7 +10,7 @@ const cores = {
   indefinido: "text-muted",
 } as const;
 
-/** Item da faixa de semáforo do operador (pílula horizontal). */
+/** Item da faixa de semáforo do painel (pílula horizontal). */
 export function SemaforoItem({ p }: { p: ParametroLeitura }) {
   const destaque = p.status === "falha";
   const texto =

@@ -194,7 +194,6 @@ export function normalizarTeste(
     lerCampo(bruto, ["linha", "Linha", "linhaProducao", "linha_producao"]) ?? "",
   ).trim();
   const ipCeteva = String(lerCampo(bruto, ["ipCeteva", "IP", "ip", "ceteva", "IP CETEVA"]) ?? "").trim();
-  const operador = String(lerCampo(bruto, ["operador", "Operador", "operator"]) ?? "").trim();
   const dthInicio = String(lerCampo(bruto, ["dthInicio", "dataInicio", "inicio"]) ?? "").trim();
   const dthGeraLog = String(lerCampo(bruto, ["dthGeraLog", "dataLog", "dthFim", "fim"]) ?? "").trim();
 
@@ -239,7 +238,6 @@ export function normalizarTeste(
     turno: turnoInfo?.id ?? null,
     turnoLabel: turnoInfo?.label ?? "",
     ipCeteva,
-    operador,
     dthInicio,
     dthGeraLog,
     recebidoEm: new Date().toISOString(),
@@ -409,9 +407,6 @@ function montarExcecoes(atual: Teste | null, ordenados: Teste[]): Excecao[] {
           titulo: TITULOS_ATENCAO[p.id] ?? `${p.label} em atenção`,
         });
       }
-    }
-    if (!atual.operador) {
-      lista.push({ nivel: "atencao", tipo: "operador", titulo: "Operador não informado" });
     }
   }
 

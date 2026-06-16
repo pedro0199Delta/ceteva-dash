@@ -134,8 +134,6 @@ export function SupervisaoView({ snapshot }: { snapshot: Snapshot }) {
           <span>Execução {teste?.dthGeraLog || teste?.dthInicio || "—"}</span>
           <span>·</span>
           <span>CETEVA {teste?.ipCeteva || "—"}</span>
-          <span>·</span>
-          <span>Operador {teste?.operador || "—"}</span>
         </div>
       </Card>
 

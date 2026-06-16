@@ -5,7 +5,6 @@ import { useSnapshot } from "@/hooks/useSnapshot";
 import { montarSnapshot } from "@/lib/domain/rules";
 import { Topbar } from "@/components/Topbar";
 import { OperadorView } from "@/components/views/OperadorView";
-import { SupervisaoView } from "@/components/views/SupervisaoView";
 
 export function Dashboard() {
   const { config, carregado } = useConfig();
@@ -25,10 +24,8 @@ export function Dashboard() {
       />
       {!carregado ? (
         <div className="flex flex-1 items-center justify-center text-sm text-muted">Carregando…</div>
-      ) : config.modo === "operador" ? (
-        <OperadorView snapshot={dados} />
       ) : (
-        <SupervisaoView snapshot={dados} />
+        <OperadorView snapshot={dados} />
       )}
     </div>
   );

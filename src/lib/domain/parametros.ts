@@ -66,7 +66,7 @@ export const PARAMETROS: ParametroDef[] = [
   },
 ];
 
-/** Parâmetros exibidos na faixa de semáforo do operador (inclui corrente e potência). */
+/** Parâmetros exibidos na faixa de semáforo do painel (inclui corrente e potência). */
 export const SEMAFORO_OPERADOR = [
   "corrente",
   "potencia",

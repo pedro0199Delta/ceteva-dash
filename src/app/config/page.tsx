@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useConfig, type Modo, type Tema } from "@/context/ConfigContext";
+import { useConfig, type Tema } from "@/context/ConfigContext";
 import { Card } from "@/components/ui/Card";
 import { FaixasEditor } from "@/components/config/FaixasEditor";
 import { TurnosEditor } from "@/components/config/TurnosEditor";
@@ -168,17 +168,6 @@ Content-Type: application/json
       </Card>
 
       <Card className="px-5">
-        <Linha titulo="Modo de exibição" descricao="Alterna entre o console do operador e a visão expandida de supervisão.">
-          <Segmented<Modo>
-            valor={config.modo}
-            opcoes={[
-              { id: "operador", label: "Operador" },
-              { id: "supervisao", label: "Supervisão" },
-            ]}
-            onChange={(modo) => setConfig({ modo })}
-          />
-        </Linha>
-
         <Linha titulo="Tema" descricao="Escuro recomendado para o chão de fábrica.">
           <Segmented<Tema>
             valor={config.tema}

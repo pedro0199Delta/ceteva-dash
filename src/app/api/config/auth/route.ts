@@ -12,7 +12,7 @@ const COOKIE_OPTS = {
   httpOnly: true,
   sameSite: "lax" as const,
   path: "/",
-  maxAge: 60 * 60 * 8,
+  // Sessão do navegador — encerrada ao sair da página /config
 };
 
 export async function OPTIONS() {
@@ -24,7 +24,7 @@ export async function GET() {
   return jsonCors({ autenticado: await configAutenticado() });
 }
 
-/** Valida senha e abre sessão (8 h). */
+/** Valida senha e abre sessão (somente enquanto permanecer em /config). */
 export async function POST(req: Request) {
   let corpo: unknown;
   try {
