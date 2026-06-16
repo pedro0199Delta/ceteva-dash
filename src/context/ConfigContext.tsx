@@ -18,6 +18,8 @@ export interface Config {
   intervaloMs: number;
   /** Nome da linha cadastrada — vazio = todas. */
   linhaFiltro: string;
+  /** Turno fixo — vazio = turno vigente automático. */
+  turnoFiltro: string;
 }
 
 const PADRAO: Config = {
@@ -25,6 +27,7 @@ const PADRAO: Config = {
   tema: "dark",
   intervaloMs: 2000,
   linhaFiltro: "",
+  turnoFiltro: "",
 };
 
 const CHAVE = "dashdelta:config";

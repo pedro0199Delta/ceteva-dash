@@ -20,9 +20,12 @@ import type {
 import {
   dataReferenciaTeste,
   formatarHoraCurta,
+  horaFabrica,
   janelaTurnoAtual,
+  janelaTurnoPorId,
   testeNaJanela,
 } from "./turnos";
+import { agoraFabrica } from "./fusoFabrica";
 import { TURNOS_PADRAO } from "./turnosPadrao";
 
 /* ----------------------------- utilidades ----------------------------- */
@@ -298,6 +301,8 @@ const TITULOS_ATENCAO: Record<string, string> = {
 
 export interface OpcoesSnapshot {
   linhaFiltro?: string;
+  /** 1, 2 ou 3 — vazio = turno vigente automático. */
+  turnoFiltro?: 1 | 2 | 3;
   turnos?: TurnosConfig;
 }
 
@@ -327,7 +332,7 @@ function montarTendenciaTurno(ordenados: Teste[], inicio: Date, fim: Date): Pont
       return d >= cursor && d < fimSlot;
     });
     pontos.push({
-      hora: `${String(cursor.getHours()).padStart(2, "0")}h`,
+      hora: `${String(horaFabrica(cursor)).padStart(2, "0")}h`,
       desvios: naFaixa.filter((t) => t.resultado === "reprovado").length,
       total: naFaixa.length,
     });
@@ -339,8 +344,10 @@ function montarTendenciaTurno(ordenados: Teste[], inicio: Date, fim: Date): Pont
 export function montarSnapshot(testes: Teste[], opcoes: OpcoesSnapshot = {}): Snapshot {
   const turnos = opcoes.turnos ?? TURNOS_PADRAO;
   const linhaFiltro = opcoes.linhaFiltro?.trim() ?? "";
-  const agora = new Date();
-  const janela = janelaTurnoAtual(agora, turnos);
+  const agora = agoraFabrica();
+  const janela = opcoes.turnoFiltro
+    ? janelaTurnoPorId(agora, turnos, opcoes.turnoFiltro)
+    : janelaTurnoAtual(turnos, agora);
 
   const porLinha = filtrarPorLinha(testes, linhaFiltro || undefined);
   const ordenados = [...porLinha].sort(
@@ -384,6 +391,7 @@ export function montarSnapshot(testes: Teste[], opcoes: OpcoesSnapshot = {}): Sn
       inicio: formatarHoraCurta(janela.inicio),
       fim: formatarHoraCurta(janela.fim),
     },
+    turnoFiltro: opcoes.turnoFiltro ?? null,
     linhaFiltro,
     tempoMedioSeg,
     tendencia,

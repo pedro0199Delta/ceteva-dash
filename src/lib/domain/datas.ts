@@ -1,17 +1,26 @@
-/** Aceita "dd/MM/yyyy HH:mm:ss" e "yyyy-MM-dd HH:mm:ss". */
+import {
+  FUSO_FABRICA,
+  instanteFabrica,
+  partesDataFabrica,
+} from "./fusoFabrica";
+
+/** Aceita "dd/MM/yyyy HH:mm:ss" e "yyyy-MM-dd HH:mm:ss" (horário da fábrica). */
 export function parseData(texto: string | undefined): Date | null {
   if (!texto) return null;
   const t = texto.trim();
+
   let m = t.match(/^(\d{2})\/(\d{2})\/(\d{4})[ T](\d{2}):(\d{2}):(\d{2})/);
   if (m) {
     const [, dd, MM, yyyy, hh, mi, ss] = m;
-    return new Date(+yyyy, +MM - 1, +dd, +hh, +mi, +ss);
+    return instanteFabrica(+yyyy, +MM, +dd, +hh, +mi, +ss);
   }
+
   m = t.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})/);
   if (m) {
     const [, yyyy, MM, dd, hh, mi, ss] = m;
-    return new Date(+yyyy, +MM - 1, +dd, +hh, +mi, +ss);
+    return instanteFabrica(+yyyy, +MM, +dd, +hh, +mi, +ss);
   }
+
   const d = new Date(t);
   return Number.isNaN(d.getTime()) ? null : d;
 }
@@ -33,4 +42,18 @@ export function parseTempoTeste(texto: unknown): number | null {
     return +mi * 60 + +ss;
   }
   return null;
+}
+
+/** Hora curta no fuso da fábrica. */
+export function formatarHoraFabrica(instant: Date): string {
+  return instant.toLocaleTimeString("pt-BR", {
+    timeZone: FUSO_FABRICA,
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/** Hora cheia (para tendência) no fuso da fábrica. */
+export function horaFabrica(instant: Date): number {
+  return partesDataFabrica(instant).hora;
 }

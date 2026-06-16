@@ -9,7 +9,7 @@ import { SupervisaoView } from "@/components/views/SupervisaoView";
 
 export function Dashboard() {
   const { config, carregado } = useConfig();
-  const { snapshot } = useSnapshot(config.intervaloMs, config.linhaFiltro);
+  const { snapshot } = useSnapshot(config.intervaloMs, config.linhaFiltro, config.turnoFiltro);
 
   const dados = snapshot ?? montarSnapshot([]);
   const conectado =

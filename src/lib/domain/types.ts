@@ -148,6 +148,8 @@ export interface Snapshot {
   /** Métricas do turno vigente (zeram ao mudar o turno). */
   yieldTurno: YieldResumo;
   turnoAtual: TurnoAtualInfo | null;
+  /** Turno selecionado no filtro (null = automático). */
+  turnoFiltro: 1 | 2 | 3 | null;
   linhaFiltro: string;
   tempoMedioSeg: number | null;
   tendencia: PontoTendencia[];

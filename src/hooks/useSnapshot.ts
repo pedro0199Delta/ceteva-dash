@@ -9,7 +9,7 @@ interface Estado {
   erro: string | null;
 }
 
-export function useSnapshot(intervaloMs: number, linhaFiltro = "") {
+export function useSnapshot(intervaloMs: number, linhaFiltro = "", turnoFiltro = "") {
   const [estado, setEstado] = useState<Estado>({
     snapshot: null,
     carregando: true,
@@ -22,7 +22,10 @@ export function useSnapshot(intervaloMs: number, linhaFiltro = "") {
 
     async function buscar() {
       try {
-        const qs = linhaFiltro ? `?linha=${encodeURIComponent(linhaFiltro)}` : "";
+        const params = new URLSearchParams();
+        if (linhaFiltro) params.set("linha", linhaFiltro);
+        if (turnoFiltro) params.set("turno", turnoFiltro);
+        const qs = params.toString() ? `?${params.toString()}` : "";
         const res = await fetch(`/api/snapshot${qs}`, { cache: "no-store" });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = (await res.json()) as Snapshot;
@@ -43,7 +46,7 @@ export function useSnapshot(intervaloMs: number, linhaFiltro = "") {
       ativo.current = false;
       clearInterval(id);
     };
-  }, [intervaloMs, linhaFiltro]);
+  }, [intervaloMs, linhaFiltro, turnoFiltro]);
 
   return estado;
 }

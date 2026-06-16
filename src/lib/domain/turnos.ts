@@ -1,3 +1,11 @@
+import {
+  agoraFabrica,
+  diaAnteriorFabrica,
+  diaSeguinteFabrica,
+  instanteFabrica,
+  minutosNaFabrica,
+  partesDataFabrica,
+} from "./fusoFabrica";
 import { parseData } from "./datas";
 import type { Teste, TurnoDef, TurnosConfig } from "./types";
 
@@ -23,19 +31,19 @@ function turnosOrdenados(config: TurnosConfig) {
   );
 }
 
+function instanteFromMinutos(ano: number, mes: number, dia: number, minutos: number) {
+  return instanteFabrica(ano, mes, dia, Math.floor(minutos / 60), minutos % 60);
+}
+
 /** Data/hora de referência do teste (prioriza dthGeraLog). */
 export function dataReferenciaTeste(teste: Teste): Date {
   return parseData(teste.dthGeraLog) ?? new Date(teste.recebidoEm);
 }
 
-export function dataReferenciaTexto(texto: string | undefined, fallback: Date): Date {
-  return parseData(texto) ?? fallback;
-}
-
-/** Classifica turno pelo horário (usa dthGeraLog quando disponível). */
-export function classificarTurno(data: Date, config: TurnosConfig): TurnoDef {
+/** Classifica turno pelo horário da fábrica (São Paulo). */
+export function classificarTurno(referencia: Date, config: TurnosConfig): TurnoDef {
   const ordenados = turnosOrdenados(config);
-  const minutos = data.getHours() * 60 + data.getMinutes();
+  const minutos = minutosNaFabrica(referencia);
   const primeiro = parseHora(ordenados[0].inicio) ?? 0;
 
   for (let i = ordenados.length - 1; i >= 0; i--) {
@@ -43,42 +51,58 @@ export function classificarTurno(data: Date, config: TurnosConfig): TurnoDef {
     if (minutos >= inicio) return ordenados[i];
   }
 
-  // Antes do 1º turno → ainda no 3º turno (madrugada)
   if (minutos < primeiro) return ordenados[ordenados.length - 1];
 
   return ordenados[0];
 }
 
-/** Janela [inicio, fim) do turno vigente na data informada. */
-export function janelaTurnoAtual(agora: Date, config: TurnosConfig): JanelaTurno {
+/** Janela [inicio, fim) de um turno específico na data de referência. */
+export function janelaTurnoPorId(
+  referencia: Date,
+  config: TurnosConfig,
+  turnoId: 1 | 2 | 3,
+): JanelaTurno {
   const ordenados = turnosOrdenados(config);
-  const turno = classificarTurno(agora, config);
-  const idx = ordenados.findIndex((t) => t.id === turno.id);
-  const startMin = parseHora(ordenados[idx].inicio) ?? 0;
+  const idx = ordenados.findIndex((t) => t.id === turnoId);
+  const turno = ordenados[idx >= 0 ? idx : 0];
+  const startMin = parseHora(turno.inicio) ?? 0;
   const next = ordenados[(idx + 1) % ordenados.length];
   const endMin = parseHora(next.inicio) ?? 0;
 
-  const inicio = new Date(agora);
-  inicio.setSeconds(0, 0);
-  inicio.setMilliseconds(0);
-  inicio.setHours(Math.floor(startMin / 60), startMin % 60, 0, 0);
-
-  const agoraMin = agora.getHours() * 60 + agora.getMinutes();
+  const ref = partesDataFabrica(referencia);
+  const minutosRef = minutosNaFabrica(referencia);
   const primeiroMin = parseHora(ordenados[0].inicio) ?? 0;
+  const ultimoIdx = ordenados.length - 1;
 
-  if (idx === ordenados.length - 1 && agoraMin < primeiroMin) {
-    inicio.setDate(inicio.getDate() - 1);
+  let { ano, mes, dia } = ref;
+
+  if (idx === ultimoIdx && minutosRef < primeiroMin) {
+    const prev = diaAnteriorFabrica(ano, mes, dia);
+    ano = prev.ano;
+    mes = prev.mes;
+    dia = prev.dia;
   }
 
-  const fim = new Date(inicio);
-  if (endMin > startMin) {
-    fim.setHours(Math.floor(endMin / 60), endMin % 60, 0, 0);
-  } else {
-    fim.setDate(fim.getDate() + 1);
-    fim.setHours(Math.floor(endMin / 60), endMin % 60, 0, 0);
+  const inicio = instanteFromMinutos(ano, mes, dia, startMin);
+
+  let fimAno = ano;
+  let fimMes = mes;
+  let fimDia = dia;
+  if (endMin <= startMin) {
+    const prox = diaSeguinteFabrica(ano, mes, dia);
+    fimAno = prox.ano;
+    fimMes = prox.mes;
+    fimDia = prox.dia;
   }
+  const fim = instanteFromMinutos(fimAno, fimMes, fimDia, endMin);
 
   return { id: turno.id, label: turno.label, inicio, fim };
+}
+
+/** Janela do turno vigente agora (horário da fábrica). */
+export function janelaTurnoAtual(config: TurnosConfig, referencia = agoraFabrica()): JanelaTurno {
+  const turno = classificarTurno(referencia, config);
+  return janelaTurnoPorId(referencia, config, turno.id);
 }
 
 export function testeNaJanela(teste: Teste, inicio: Date, fim: Date): boolean {
@@ -86,6 +110,4 @@ export function testeNaJanela(teste: Teste, inicio: Date, fim: Date): boolean {
   return d >= inicio && d < fim;
 }
 
-export function formatarHoraCurta(d: Date): string {
-  return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-}
+export { formatarHoraFabrica as formatarHoraCurta, horaFabrica } from "./datas";

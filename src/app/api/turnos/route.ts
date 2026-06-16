@@ -34,8 +34,6 @@ export async function OPTIONS() {
 }
 
 export async function GET() {
-  const negado = await exigirConfigAuth();
-  if (negado) return negado;
   const config = await lerTurnos();
   return jsonCors(config);
 }

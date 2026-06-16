@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useConfig } from "@/context/ConfigContext";
 import { useLinhasCadastro } from "@/hooks/useLinhasCadastro";
+import { useTurnosCadastro } from "@/hooks/useTurnosCadastro";
 import { formatHora } from "@/lib/format";
 import type { TurnoAtualInfo } from "@/lib/domain/types";
 
@@ -17,6 +18,7 @@ export function Topbar({
 }) {
   const { config, setConfig } = useConfig();
   const linhas = useLinhasCadastro();
+  const turnos = useTurnosCadastro();
   const modoLabel = config.modo === "operador" ? "Operador" : "Supervisão";
 
   return (
@@ -33,6 +35,22 @@ export function Topbar({
       </div>
 
       <div className="flex flex-wrap items-center gap-3 text-xs">
+        {turnos.length > 0 && (
+          <select
+            value={config.turnoFiltro}
+            onChange={(e) => setConfig({ turnoFiltro: e.target.value })}
+            className="rounded-md border border-line bg-panel px-2 py-1.5 font-semibold text-fg outline-none focus:border-accent"
+            aria-label="Filtrar por turno"
+          >
+            <option value="">Turno atual</option>
+            {turnos.map((t) => (
+              <option key={t.id} value={String(t.id)}>
+                {t.label} ({t.inicio})
+              </option>
+            ))}
+          </select>
+        )}
+
         {linhas.length > 0 && (
           <select
             value={config.linhaFiltro}
