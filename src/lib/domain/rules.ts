@@ -147,13 +147,14 @@ function classificarParametro(
   };
 }
 
-/** Resultado final: faixas têm prioridade sobre pass/fail do JSON. */
+/** Resultado final: falha de parâmetro ou status fail do CETEVA reprovam; faixas OK + pass aprovam. */
 function derivarResultado(parametros: ParametroLeitura[], statusJson: Resultado): Resultado {
   if (parametros.some((p) => p.status === "falha")) return "reprovado";
+  if (statusJson === "reprovado") return "reprovado";
 
   const preenchidos = parametros.filter((p) => p.status !== "indefinido");
   if (preenchidos.length > 0 && preenchidos.every((p) => p.status === "ok")) {
-    return "aprovado";
+    return statusJson === "aprovado" || statusJson === "indefinido" ? "aprovado" : statusJson;
   }
 
   return statusJson;

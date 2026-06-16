@@ -35,7 +35,8 @@ export const PARAMETROS: ParametroDef[] = [
   {
     id: "aleta",
     label: "Aleta",
-    jsonKeys: ["Abertura Aleta", "Aleta", "aleta"],
+    // "Aleta" = resultado do grid CETEVA; "Abertura Aleta" é campo auxiliar (não sobrescreve falha)
+    jsonKeys: ["Aleta", "aleta_valor", "Abertura Aleta", "aleta"],
     numerico: true,
   },
   {
