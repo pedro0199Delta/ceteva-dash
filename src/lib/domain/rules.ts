@@ -194,6 +194,9 @@ export function normalizarTeste(
     lerCampo(bruto, ["linha", "Linha", "linhaProducao", "linha_producao"]) ?? "",
   ).trim();
   const ipCeteva = String(lerCampo(bruto, ["ipCeteva", "IP", "ip", "ceteva", "IP CETEVA"]) ?? "").trim();
+  const idMachine = String(
+    lerCampo(bruto, ["id_machine", "idMachine", "IdMachine", "modulo", "Modulo", "machine"]) ?? "",
+  ).trim();
   const operador = String(lerCampo(bruto, ["operador", "Operador", "operator"]) ?? "").trim();
   const dthInicio = String(lerCampo(bruto, ["dthInicio", "dataInicio", "inicio"]) ?? "").trim();
   const dthGeraLog = String(lerCampo(bruto, ["dthGeraLog", "dataLog", "dthFim", "fim"]) ?? "").trim();
@@ -239,6 +242,7 @@ export function normalizarTeste(
     turno: turnoInfo?.id ?? null,
     turnoLabel: turnoInfo?.label ?? "",
     ipCeteva,
+    idMachine,
     operador,
     dthInicio,
     dthGeraLog,
@@ -389,24 +393,31 @@ export function montarSnapshot(testes: Teste[], opcoes: OpcoesSnapshot = {}): Sn
   };
 }
 
+function tituloExcecao(base: string, teste: Teste | null): string {
+  const modulo = teste?.idMachine?.trim();
+  return modulo ? `${modulo} — ${base}` : base;
+}
+
 function montarExcecoes(atual: Teste | null, ordenados: Teste[]): Excecao[] {
   const lista: Excecao[] = [];
   if (atual) {
     for (const p of atual.parametros) {
       if (p.status === "falha") {
+        const base = TITULOS_FALHA[p.id] ?? `${p.label} em falha`;
         lista.push({
           nivel: "falha",
           tipo: p.id,
-          titulo: TITULOS_FALHA[p.id] ?? `${p.label} em falha`,
+          titulo: tituloExcecao(base, atual),
         });
       }
     }
     for (const p of atual.parametros) {
       if (p.status === "atencao") {
+        const base = TITULOS_ATENCAO[p.id] ?? `${p.label} em atenção`;
         lista.push({
           nivel: "atencao",
           tipo: p.id,
-          titulo: TITULOS_ATENCAO[p.id] ?? `${p.label} em atenção`,
+          titulo: tituloExcecao(base, atual),
         });
       }
     }
@@ -422,7 +433,7 @@ function montarExcecoes(atual: Teste | null, ordenados: Teste[]): Excecao[] {
     lista.unshift({
       nivel: "falha",
       tipo: "sequencia",
-      titulo: `Sequência de ${seq} reprovações`,
+      titulo: tituloExcecao(`Sequência de ${seq} reprovações`, atual),
     });
   }
 

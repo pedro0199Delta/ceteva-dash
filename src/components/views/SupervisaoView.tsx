@@ -1,7 +1,7 @@
 import type { Snapshot } from "@/lib/domain/types";
 import { indicadorCritico } from "@/lib/domain/rules";
 import { parametrosVazios } from "@/lib/domain/parametros";
-import { formatDuracao, resultadoLabel, resultadoToken, statusLabel } from "@/lib/format";
+import { formatDuracao, resultadoLabel, resultadoToken, statusLabel, labelModuloCeteva } from "@/lib/format";
 import { Card } from "@/components/ui/Card";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { SectionLabel } from "@/components/ui/SectionLabel";
@@ -133,7 +133,7 @@ export function SupervisaoView({ snapshot }: { snapshot: Snapshot }) {
           <span>·</span>
           <span>Execução {teste?.dthGeraLog || teste?.dthInicio || "—"}</span>
           <span>·</span>
-          <span>CETEVA {teste?.ipCeteva || "—"}</span>
+          <span>CETEVA {labelModuloCeteva(teste)}</span>
         </div>
       </Card>
 

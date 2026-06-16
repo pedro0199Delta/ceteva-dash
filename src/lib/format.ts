@@ -41,3 +41,16 @@ export function formatHora(iso: string): string {
   if (Number.isNaN(d.getTime())) return "--:--:--";
   return d.toLocaleTimeString("pt-BR");
 }
+
+/** Rótulo do posto CETEVA: prioriza id_machine, depois IP legado. */
+export function labelModuloCeteva(teste: {
+  idMachine?: string;
+  ipCeteva?: string;
+} | null | undefined): string {
+  if (!teste) return "—";
+  const id = teste.idMachine?.trim();
+  if (id) return id;
+  const ip = teste.ipCeteva?.trim();
+  if (ip) return ip;
+  return "—";
+}

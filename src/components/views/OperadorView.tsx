@@ -1,7 +1,7 @@
 import type { Snapshot, Teste } from "@/lib/domain/types";
 import { indicadorCritico } from "@/lib/domain/rules";
 import { parametrosVazios, SEMAFORO_OPERADOR } from "@/lib/domain/parametros";
-import { resultadoLabel, resultadoToken, statusLabel, statusToken } from "@/lib/format";
+import { resultadoLabel, resultadoToken, statusLabel, statusToken, labelModuloCeteva } from "@/lib/format";
 import { Card } from "@/components/ui/Card";
 import { MetricCard } from "@/components/ui/MetricCard";
 import { ModeloRodape } from "@/components/ui/ModeloRodape";
@@ -67,7 +67,13 @@ export function OperadorView({ snapshot }: { snapshot: Snapshot }) {
           titulo="Linha"
           badge={teste?.turnoLabel || snapshot.turnoAtual?.label || "Turno"}
           valor={teste?.linha || snapshot.linhaFiltro || "—"}
-          sub={teste?.ipCeteva ? `CETEVA ${teste.ipCeteva}` : snapshot.linhaFiltro ? `Filtro: ${snapshot.linhaFiltro}` : "—"}
+          sub={
+            teste
+              ? `CETEVA ${labelModuloCeteva(teste)}`
+              : snapshot.linhaFiltro
+                ? `Filtro: ${snapshot.linhaFiltro}`
+                : "—"
+          }
           token="accent"
           borda="top"
           valorAdaptavel
