@@ -12,7 +12,7 @@ export function TurnosEditor() {
   const carregar = useCallback(async () => {
     setCarregando(true);
     try {
-      const res = await fetch("/api/turnos", { cache: "no-store" });
+      const res = await fetch("/api/turnos", { cache: "no-store", credentials: "include" });
       const data = await res.json();
       setTurnos(data.turnos ?? []);
     } catch {
@@ -38,6 +38,7 @@ export function TurnosEditor() {
       const res = await fetch("/api/turnos", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ turnos }),
       });
       const data = await res.json();
@@ -54,7 +55,7 @@ export function TurnosEditor() {
   async function resetar() {
     if (!confirm("Restaurar horários padrão dos turnos?")) return;
     setSalvando(true);
-    await fetch("/api/turnos", { method: "DELETE" });
+    await fetch("/api/turnos", { method: "DELETE", credentials: "include" });
     await carregar();
     setMsg("Turnos resetados.");
     setSalvando(false);

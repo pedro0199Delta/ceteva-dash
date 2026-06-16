@@ -1,6 +1,7 @@
 import { adicionarTeste, limparTestes, listarTestes } from "@/lib/store";
 import type { TesteBruto } from "@/lib/domain/types";
 import { corsHeaders, jsonCors, optionsCors } from "@/lib/api/cors";
+import { exigirConfigAuth } from "@/lib/api/exigirConfigAuth";
 
 export const dynamic = "force-dynamic";
 
@@ -65,6 +66,8 @@ export async function GET() {
 }
 
 export async function DELETE() {
+  const negado = await exigirConfigAuth();
+  if (negado) return negado;
   await limparTestes();
   return jsonCors({ ok: true, mensagem: "Histórico limpo" });
 }

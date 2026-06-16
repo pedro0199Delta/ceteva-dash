@@ -1,5 +1,6 @@
 import { lerLinhas, salvarLinhas } from "@/lib/store";
 import { jsonCors, optionsCors } from "@/lib/api/cors";
+import { exigirConfigAuth } from "@/lib/api/exigirConfigAuth";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,8 @@ export async function GET() {
 }
 
 export async function PUT(req: Request) {
+  const negado = await exigirConfigAuth();
+  if (negado) return negado;
   let corpo: unknown;
   try {
     corpo = await req.json();

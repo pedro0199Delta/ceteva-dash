@@ -46,6 +46,7 @@ export function LinhasEditor() {
       const res = await fetch("/api/linhas", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ linhas }),
       });
       const data = await res.json();

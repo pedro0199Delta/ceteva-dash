@@ -3,6 +3,7 @@ import { PARAMETROS } from "@/lib/domain/parametros";
 import type { FaixaParametro } from "@/lib/domain/types";
 import { lerFaixas, resetarFaixas, salvarFaixas } from "@/lib/store";
 import { corsHeaders, jsonCors, optionsCors } from "@/lib/api/cors";
+import { exigirConfigAuth } from "@/lib/api/exigirConfigAuth";
 
 export const dynamic = "force-dynamic";
 
@@ -11,12 +12,16 @@ export async function OPTIONS() {
 }
 
 export async function GET() {
+  const negado = await exigirConfigAuth();
+  if (negado) return negado;
   const config = await lerFaixas();
   const labels = Object.fromEntries(PARAMETROS.map((p) => [p.id, p.label]));
   return jsonCors({ ...config, labels });
 }
 
 export async function PUT(req: Request) {
+  const negado = await exigirConfigAuth();
+  if (negado) return negado;
   let corpo: unknown;
   try {
     corpo = await req.json();
@@ -59,6 +64,8 @@ export async function PUT(req: Request) {
 }
 
 export async function DELETE() {
+  const negado = await exigirConfigAuth();
+  if (negado) return negado;
   const config = await resetarFaixas();
   return jsonCors({ ok: true, mensagem: "Faixas resetadas", ...config });
 }

@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { FaixasEditor } from "@/components/config/FaixasEditor";
 import { TurnosEditor } from "@/components/config/TurnosEditor";
 import { LinhasEditor } from "@/components/config/LinhasEditor";
+import { ConfigGate } from "@/components/config/ConfigGate";
 
 function Segmented<T extends string>({
   valor,
@@ -59,12 +60,17 @@ export default function ConfigPage() {
   }, []);
 
   async function limparDados() {
-    await fetch("/api/testes", { method: "DELETE" });
+    const res = await fetch("/api/testes", { method: "DELETE", credentials: "include" });
+    if (!res.ok) {
+      setMsg("Sem permissão. Faça login novamente.");
+      return;
+    }
     setMsg("Histórico limpo. Aguardando novos dados.");
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-3xl flex-col gap-5 p-5">
+    <ConfigGate>
+    <div className="mx-auto flex min-h-screen max-w-3xl flex-col gap-5 p-5 pb-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-extrabold text-fg">Configuração</h1>
@@ -198,5 +204,6 @@ Content-Type: application/json
         </Linha>
       </Card>
     </div>
+    </ConfigGate>
   );
 }

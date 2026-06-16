@@ -1,6 +1,7 @@
 import type { TurnoDef } from "@/lib/domain/types";
 import { lerTurnos, resetarTurnos, salvarTurnos } from "@/lib/store";
 import { jsonCors, optionsCors } from "@/lib/api/cors";
+import { exigirConfigAuth } from "@/lib/api/exigirConfigAuth";
 
 export const dynamic = "force-dynamic";
 
@@ -33,11 +34,15 @@ export async function OPTIONS() {
 }
 
 export async function GET() {
+  const negado = await exigirConfigAuth();
+  if (negado) return negado;
   const config = await lerTurnos();
   return jsonCors(config);
 }
 
 export async function PUT(req: Request) {
+  const negado = await exigirConfigAuth();
+  if (negado) return negado;
   let corpo: unknown;
   try {
     corpo = await req.json();
@@ -55,6 +60,8 @@ export async function PUT(req: Request) {
 }
 
 export async function DELETE() {
+  const negado = await exigirConfigAuth();
+  if (negado) return negado;
   const config = await resetarTurnos();
   return jsonCors({ ok: true, mensagem: "Turnos resetados", ...config });
 }

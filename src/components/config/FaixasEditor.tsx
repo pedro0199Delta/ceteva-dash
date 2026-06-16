@@ -43,7 +43,7 @@ export function FaixasEditor() {
   const carregar = useCallback(async () => {
     setCarregando(true);
     try {
-      const res = await fetch("/api/faixas", { cache: "no-store" });
+      const res = await fetch("/api/faixas", { cache: "no-store", credentials: "include" });
       const data = await res.json();
       setFaixas(paraForm(data.faixas ?? []));
     } catch {
@@ -72,6 +72,7 @@ export function FaixasEditor() {
       const res = await fetch("/api/faixas", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ faixas: payload }),
       });
       const data = await res.json();
@@ -88,7 +89,7 @@ export function FaixasEditor() {
   async function resetar() {
     if (!confirm("Limpar todas as faixas configuradas?")) return;
     setSalvando(true);
-    await fetch("/api/faixas", { method: "DELETE" });
+    await fetch("/api/faixas", { method: "DELETE", credentials: "include" });
     await carregar();
     setMsg("Faixas resetadas.");
     setSalvando(false);
