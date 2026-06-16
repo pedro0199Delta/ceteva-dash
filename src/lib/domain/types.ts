@@ -111,6 +111,8 @@ export interface Teste {
   turno: 1 | 2 | 3 | null;
   turnoLabel: string;
   ipCeteva: string;
+  /** Recebido do CETEVA, se enviado — não exibido na UI. */
+  operador: string;
   dthInicio: string;
   dthGeraLog: string;
   recebidoEm: string; // ISO

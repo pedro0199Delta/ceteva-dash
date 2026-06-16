@@ -9,9 +9,11 @@ import {
   useState,
 } from "react";
 
+export type Modo = "operador" | "supervisao";
 export type Tema = "dark" | "light" | "system";
 
 export interface Config {
+  modo: Modo;
   tema: Tema;
   intervaloMs: number;
   /** Nome da linha cadastrada — vazio = todas. */
@@ -19,6 +21,7 @@ export interface Config {
 }
 
 const PADRAO: Config = {
+  modo: "operador",
   tema: "dark",
   intervaloMs: 2000,
   linhaFiltro: "",
