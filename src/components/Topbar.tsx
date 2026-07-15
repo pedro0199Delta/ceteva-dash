@@ -82,6 +82,12 @@ export function Topbar({
           {modoLabel}
         </span>
         <Link
+          href="/relatorio"
+          className="rounded-md border border-line bg-panel px-3 py-1 font-semibold text-fg transition-colors hover:border-accent hover:text-accent"
+        >
+          Relatório
+        </Link>
+        <Link
           href="/config"
           className="rounded-md border border-line bg-panel px-3 py-1 font-semibold text-fg transition-colors hover:border-accent hover:text-accent"
         >
