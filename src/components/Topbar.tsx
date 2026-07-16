@@ -11,15 +11,18 @@ export function Topbar({
   conectado,
   ultimaAtualizacao,
   turnoAtual,
+  kiosk = false,
 }: {
   conectado: boolean;
   ultimaAtualizacao?: string;
   turnoAtual?: TurnoAtualInfo | null;
+  /** Modo TV: oculta links administrativos e fixa exibição operador. */
+  kiosk?: boolean;
 }) {
   const { config, setConfig } = useConfig();
   const linhas = useLinhasCadastro();
   const turnos = useTurnosCadastro();
-  const modoLabel = config.modo === "operador" ? "Operador" : "Supervisão";
+  const modoLabel = kiosk ? "Operador" : config.modo === "operador" ? "Operador" : "Supervisão";
 
   return (
     <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-3">
@@ -81,18 +84,22 @@ export function Topbar({
         <span className="rounded-md border border-line px-2 py-1 font-semibold text-muted">
           {modoLabel}
         </span>
-        <Link
-          href="/relatorio"
-          className="rounded-md border border-line bg-panel px-3 py-1 font-semibold text-fg transition-colors hover:border-accent hover:text-accent"
-        >
-          Relatório
-        </Link>
-        <Link
-          href="/config"
-          className="rounded-md border border-line bg-panel px-3 py-1 font-semibold text-fg transition-colors hover:border-accent hover:text-accent"
-        >
-          ⚙ Configuração
-        </Link>
+        {!kiosk && (
+          <>
+            <Link
+              href="/relatorio"
+              className="rounded-md border border-line bg-panel px-3 py-1 font-semibold text-fg transition-colors hover:border-accent hover:text-accent"
+            >
+              Relatório
+            </Link>
+            <Link
+              href="/config"
+              className="rounded-md border border-line bg-panel px-3 py-1 font-semibold text-fg transition-colors hover:border-accent hover:text-accent"
+            >
+              ⚙ Configuração
+            </Link>
+          </>
+        )}
       </div>
     </header>
   );
