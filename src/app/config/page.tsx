@@ -36,13 +36,10 @@ function Segmented<T extends string>({
   );
 }
 
-function Linha({ titulo, descricao, children }: { titulo: string; descricao: string; children: React.ReactNode }) {
+function Linha({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-3 border-b border-line py-5 last:border-0 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <h3 className="font-semibold text-fg">{titulo}</h3>
-        <p className="mt-0.5 text-sm text-muted">{descricao}</p>
-      </div>
+      <h3 className="font-semibold text-fg">{titulo}</h3>
       <div className="shrink-0">{children}</div>
     </div>
   );
@@ -86,9 +83,6 @@ export default function ConfigPage() {
 
       <Card className="p-5">
         <h3 className="font-semibold text-fg">Turnos de produção</h3>
-        <p className="mt-0.5 text-sm text-muted">
-          Horários do 1º, 2º e 3º turno. Estatísticas zeram ao mudar o turno (base: dthGeraLog).
-        </p>
         <div className="mt-4">
           <TurnosEditor />
         </div>
@@ -96,10 +90,6 @@ export default function ConfigPage() {
 
       <Card className="p-5">
         <h3 className="font-semibold text-fg">Linhas de produção</h3>
-        <p className="mt-0.5 text-sm text-muted">
-          Cadastre os nomes das linhas para filtrar o painel. Devem coincidir com{" "}
-          <code className="text-fg">linha_producao</code> enviado pelo CETEVA.
-        </p>
         <div className="mt-4">
           <LinhasEditor />
         </div>
@@ -107,9 +97,6 @@ export default function ConfigPage() {
 
       <Card className="p-5">
         <h3 className="font-semibold text-fg">Faixas de aprovação</h3>
-        <p className="mt-0.5 text-sm text-muted">
-          Limites min/máx por parâmetro — a dash valida cada teste recebido e marca o que falhou.
-        </p>
         <div className="mt-4">
           <FaixasEditor />
         </div>
@@ -117,10 +104,6 @@ export default function ConfigPage() {
 
       <Card className="p-5">
         <h3 className="font-semibold text-fg">Integração HTTP (app CETEVA)</h3>
-        <p className="mt-0.5 text-sm text-muted">
-          Envie cada teste concluído via POST. A dashboard inicia vazia e exibe os dados assim que
-          chegarem pela rede WiFi.
-        </p>
 
         <div className="mt-4 rounded-lg border border-line bg-panel-2 p-4">
           <p className="text-xs font-bold uppercase tracking-widest text-muted">URL de envio</p>
@@ -152,12 +135,6 @@ Content-Type: application/json
 }`}
         </pre>
 
-        <p className="mt-3 text-xs text-muted">
-          <strong className="text-fg">status:</strong>{" "}
-          <code>pass</code>/<code>fail</code> do JSON · a dash também valida pelas faixas
-          configuradas acima (prioridade em caso de falha de parâmetro).
-        </p>
-
         <button
           type="button"
           onClick={limparDados}
@@ -169,7 +146,7 @@ Content-Type: application/json
       </Card>
 
       <Card className="px-5">
-        <Linha titulo="Modo de exibição" descricao="Alterna entre o console compacto e a visão expandida de supervisão.">
+        <Linha titulo="Modo de exibição">
           <Segmented<Modo>
             valor={config.modo}
             opcoes={[
@@ -180,7 +157,7 @@ Content-Type: application/json
           />
         </Linha>
 
-        <Linha titulo="Tema" descricao="Escuro recomendado para o chão de fábrica.">
+        <Linha titulo="Tema">
           <Segmented<Tema>
             valor={config.tema}
             opcoes={[
@@ -192,7 +169,7 @@ Content-Type: application/json
           />
         </Linha>
 
-        <Linha titulo="Intervalo de atualização" descricao="Frequência de leitura dos dados recebidos (polling).">
+        <Linha titulo="Intervalo de atualização">
           <Segmented<string>
             valor={String(config.intervaloMs)}
             opcoes={[

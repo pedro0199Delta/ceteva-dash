@@ -67,12 +67,6 @@ export function TurnosEditor() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted">
-        Defina o horário de início de cada turno. Yield, tendência e totais consideram apenas testes
-        cujo <strong className="text-fg">dthGeraLog</strong> caia no turno vigente — ao mudar o turno,
-        os contadores recomeçam.
-      </p>
-
       <div className="space-y-3">
         {turnos.map((t) => (
           <div

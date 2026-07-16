@@ -101,12 +101,6 @@ export function FaixasEditor() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted">
-        Defina o mínimo e máximo aceitável de cada parâmetro. Valores fora da faixa marcam o
-        parâmetro em <strong className="text-falha">falha</strong> e o teste como{" "}
-        <strong className="text-falha">reprovado</strong>.
-      </p>
-
       <div className="overflow-x-auto rounded-lg border border-line">
         <table className="w-full min-w-[520px] text-sm">
           <thead>

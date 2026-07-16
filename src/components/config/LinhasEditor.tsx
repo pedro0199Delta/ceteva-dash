@@ -66,11 +66,6 @@ export function LinhasEditor() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted">
-        Cadastre os nomes exatamente como vêm no log CETEVA em{" "}
-        <code className="text-fg">linha_producao</code>. O filtro do painel usa essa lista.
-      </p>
-
       <div className="flex flex-wrap gap-2">
         <input
           type="text"
