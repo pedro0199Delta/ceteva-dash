@@ -7,6 +7,7 @@ import { useLinhasCadastro } from "@/hooks/useLinhasCadastro";
 import { useTurnosCadastro } from "@/hooks/useTurnosCadastro";
 import { agoraFabrica, partesDataFabrica } from "@/lib/domain/fusoFabrica";
 import type { RelatorioData } from "@/lib/domain/relatorio";
+import { exportarRelatorioPdf } from "@/lib/relatorioPdf";
 
 type ModoFiltro = "turno" | "periodo";
 
@@ -80,6 +81,7 @@ export default function RelatorioPage() {
   const [linha, setLinha] = useState(config.linhaFiltro);
 
   const [carregando, setCarregando] = useState(false);
+  const [baixandoPdf, setBaixandoPdf] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [relatorio, setRelatorio] = useState<RelatorioData | null>(null);
 
@@ -120,6 +122,16 @@ export default function RelatorioPage() {
       setCarregando(false);
     }
   }, [modo, data, turno, inicio, fim, linha]);
+
+  const baixarPdf = useCallback(() => {
+    if (!relatorio) return;
+    setBaixandoPdf(true);
+    try {
+      exportarRelatorioPdf(relatorio, maxFalhasCategoria);
+    } finally {
+      setBaixandoPdf(false);
+    }
+  }, [relatorio, maxFalhasCategoria]);
 
   return (
     <div className="min-h-screen bg-bg">
@@ -248,7 +260,17 @@ export default function RelatorioPage() {
 
         {relatorio && (
           <>
-            <p className="text-sm font-semibold text-muted">Período: {relatorio.periodo.descricao}</p>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm font-semibold text-muted">Período: {relatorio.periodo.descricao}</p>
+              <button
+                type="button"
+                onClick={baixarPdf}
+                disabled={baixandoPdf}
+                className="rounded-md border border-line bg-panel px-4 py-2 text-sm font-bold text-fg transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
+              >
+                {baixandoPdf ? "Gerando PDF…" : "Baixar PDF"}
+              </button>
+            </div>
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <CardResumo titulo="Total de unidades testadas" valor={fmtNum(relatorio.resumo.total)} cor="blue" />
