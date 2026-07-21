@@ -46,21 +46,23 @@ export function exportarRelatorioPdf(
 ): void {
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   const pageW = doc.internal.pageSize.getWidth();
-  let y = 14;
+  const pageH = doc.internal.pageSize.getHeight();
+  const margem = 12;
+  let y = margem;
 
-  doc.setFontSize(16);
+  doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.text("Relatório de produção", 14, y);
-  doc.setFontSize(10);
+  doc.text("Relatório de produção", margem, y);
+  doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100);
-  doc.text("Elgin · CETEVA", pageW - 14, y, { align: "right" });
+  doc.text("Elgin · CETEVA", pageW - margem, y, { align: "right" });
   doc.setTextColor(0);
-  y += 8;
+  y += 6;
 
-  doc.setFontSize(10);
-  doc.text(`Período: ${relatorio.periodo.descricao}`, 14, y);
-  y += 10;
+  doc.setFontSize(9);
+  doc.text(`Período: ${relatorio.periodo.descricao}`, margem, y);
+  y += 7;
 
   const cards = [
     {
@@ -85,35 +87,35 @@ export function exportarRelatorioPdf(
     },
   ];
 
-  const gap = 3;
-  const cardW = (pageW - 28 - gap * 3) / 4;
-  const cardH = 22;
+  const gap = 2.5;
+  const cardW = (pageW - margem * 2 - gap * 3) / 4;
+  const cardH = 16;
 
   cards.forEach((card, i) => {
-    const x = 14 + i * (cardW + gap);
+    const x = margem + i * (cardW + gap);
     doc.setFillColor(...card.cor);
     doc.roundedRect(x, y, cardW, cardH, 2, 2, "F");
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(7);
+    doc.setFontSize(6.5);
     doc.setFont("helvetica", "bold");
-    doc.text(doc.splitTextToSize(card.titulo, cardW - 4), x + cardW / 2, y + 6, {
+    doc.text(doc.splitTextToSize(card.titulo, cardW - 4), x + cardW / 2, y + 5, {
       align: "center",
     });
-    doc.setFontSize(16);
-    doc.text(card.valor, x + cardW / 2, y + 16, { align: "center" });
+    doc.setFontSize(14);
+    doc.text(card.valor, x + cardW / 2, y + 12.5, { align: "center" });
   });
 
   doc.setTextColor(0);
-  y += cardH + 10;
+  y += cardH + 6;
 
   doc.setFillColor(37, 99, 235);
-  doc.rect(14, y, pageW - 28, 7, "F");
-  doc.setFontSize(10);
+  doc.rect(margem, y, pageW - margem * 2, 5.5, "F");
+  doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(255, 255, 255);
-  doc.text("DESEMPENHO POR MÁQUINA", 16, y + 5);
+  doc.text("DESEMPENHO POR MÁQUINA", margem + 2, y + 4);
   doc.setTextColor(0);
-  y += 9;
+  y += 7;
 
   const maquinaBody =
     relatorio.maquinas.length === 0
@@ -140,8 +142,8 @@ export function exportarRelatorioPdf(
       ],
     ],
     body: maquinaBody,
-    margin: { left: 14, right: 14 },
-    styles: { fontSize: 9, cellPadding: 2.5, valign: "middle" },
+    margin: { left: margem, right: margem },
+    styles: { fontSize: 8, cellPadding: 1.8, valign: "middle", lineWidth: 0.1 },
     headStyles: {
       fillColor: [243, 246, 252],
       textColor: [86, 98, 125],
@@ -168,21 +170,20 @@ export function exportarRelatorioPdf(
     },
   });
 
-  y = doc.lastAutoTable.finalY + 10;
-
-  if (y > doc.internal.pageSize.getHeight() - 40) {
-    doc.addPage();
-    y = 14;
-  }
+  y = doc.lastAutoTable.finalY + 5;
 
   doc.setFillColor(37, 99, 235);
-  doc.rect(14, y, pageW - 28, 7, "F");
-  doc.setFontSize(10);
+  doc.rect(margem, y, pageW - margem * 2, 5.5, "F");
+  doc.setFontSize(9);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(255, 255, 255);
-  doc.text("ANÁLISE DE FALHAS POR CATEGORIA", 16, y + 5);
+  doc.text("ANÁLISE DE FALHAS POR CATEGORIA", margem + 2, y + 4);
   doc.setTextColor(0);
-  y += 9;
+  y += 7;
+
+  const espacoRestante = pageH - margem - y;
+  const linhasCategoria = relatorio.categoriasFalha.length + 1;
+  const alturaLinha = Math.min(5.2, Math.max(4.2, (espacoRestante - 4) / linhasCategoria));
 
   const colsMaquina = relatorio.maquinaIds.map(labelMaquina);
   const headCategorias = ["Categoria", ...colsMaquina, "Total", "% do total de falhas"];
@@ -199,8 +200,18 @@ export function exportarRelatorioPdf(
     startY: y,
     head: [headCategorias],
     body: categoriaBody,
-    margin: { left: 14, right: 14 },
-    styles: { fontSize: 8, cellPadding: 2.5, valign: "middle" },
+    margin: { left: margem, right: margem, bottom: margem },
+    tableWidth: pageW - margem * 2,
+    styles: {
+      fontSize: 7.5,
+      cellPadding: 1.4,
+      valign: "middle",
+      lineWidth: 0.1,
+      minCellHeight: alturaLinha,
+    },
+    pageBreak: "avoid",
+    rowPageBreak: "avoid",
+    showHead: "firstPage",
     headStyles: {
       fillColor: [243, 246, 252],
       textColor: [86, 98, 125],
